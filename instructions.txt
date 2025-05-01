@@ -1,3 +1,6 @@
 1. Importing from dump file
 cd "/Users/spartan/Library/Application Support/Neo4j Desktop/Application/relate-data/dbmss/dbms-3718b425-00ec-4d4d-b595-a45912b308a4/bin"
 ./neo4j-admin database load neo4j --from-path="/Users/spartan/Downloads" --overwrite-destination=true
+
+2. Set environment variables
+- Edit the environment variables in EXAMPLE.env to match your database configuration, and then remove the "EXAMPLE" so the file is just named ".env"

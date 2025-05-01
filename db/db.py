@@ -1,3 +1,7 @@
 from py2neo import Graph
+from dotenv import load_dotenv
+from os import getenv
 
-graph = Graph("bolt://localhost:7687", auth=("neo4j", "123456789"))
+load_dotenv()
+
+graph = Graph(f"bolt://{getenv('DB_HOST')}:{getenv('DB_PORT')}", auth=(getenv('DB_USER'), getenv('DB_PASS')))
