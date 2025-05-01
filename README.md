@@ -10,7 +10,14 @@ This project requires:
 
 ## Setup
 ### Dummy Data (Optional)
-You can use a dataset such as [Social-Media-Users-Dataset](https://www.kaggle.com/datasets/arindamsahoo/social-media-users/data) found on Kaggle. To initialize dummy data, the following command can be executed in Neo4j:
+You can use a dataset such as [Social-Media-Users-Dataset](https://www.kaggle.com/datasets/arindamsahoo/social-media-users/data) found on Kaggle.
+#### Get from a dump
+If you have a dump of the dummy data, you can execute the following command from the bin directory of your Neo4j graph DBMS:
+```
+./neo4j-admin database load neo4j --from-path="DUMP_DIRECTORY" --overwrite-destination=true
+```
+#### Get from Kaggle
+If you don't have a dump, download the dataset and the following command can be executed in Neo4j:
 ```
 LOAD CSV WITH HEADERS FROM "file:///FILE_PATH/SocialMediaUsersDataset.csv" AS r
 WITH r LIMIT 1000 MERGE (u:User {userID:r.UserID})
@@ -27,6 +34,7 @@ CALL apoc.periodic.iterate(
         MERGE (u1)-[:FOLLOWS]->(friend)", {batchSize:100}
 )
 ```
+#### After data import
 The following commands should be executed to generate the necessary labels on the dataset, as used by the project:
 
 Set usernames to first.last:
