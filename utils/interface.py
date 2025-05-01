@@ -252,7 +252,7 @@ class UserInteractionMenu(InterfaceMenu):
         except:
             cls("Invalid selection.")
         else:   
-            user_choice = self.followers[int(choice)][0]
+            user_choice = self.followers[int(choice-1)][0]
             UserInteractionMenu(self.own_username, user_choice).display()
         return self.display()
 
@@ -266,7 +266,7 @@ class UserInteractionMenu(InterfaceMenu):
         print("Select a user from the following list: ")
         for i in range(len(self.following)):
             user = self.following[i][0]
-            print(f"[{i}] {user.get('name')} ({user.get('username')})")
+            print(f"[{i+1}] {user.get('name')} ({user.get('username')})")
         
         choice = input("Enter selection: ").strip()
 
@@ -277,7 +277,7 @@ class UserInteractionMenu(InterfaceMenu):
         except:
             cls("Invalid selection.")
         else:   
-            user_choice = self.following[int(choice)][0]
+            user_choice = self.following[int(choice-1)][0]
             UserInteractionMenu(self.own_username, user_choice).display()
         return self.display()
 
@@ -292,7 +292,7 @@ class UserInteractionMenu(InterfaceMenu):
 
         for i in range(len(mutuals)):
             mutual = mutuals[i][0]
-            print(f"[{i}] {mutual.get('name')} ({mutual.get('username')})")
+            print(f"[{i+1}] {mutual.get('name')} ({mutual.get('username')})")
 
         choice = input("Enter selection: ").strip()
 
@@ -303,7 +303,7 @@ class UserInteractionMenu(InterfaceMenu):
         except:
             cls("Invalid selection.")
         else:   
-            user_choice = mutuals[int(choice)][0]
+            user_choice = mutuals[int(choice-1)][0]
             UserInteractionMenu(self.own_username, user_choice).display()
         return self.display()
 
