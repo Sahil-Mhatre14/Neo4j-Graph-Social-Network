@@ -2,30 +2,45 @@ from models import user
 import os
 
 def cls(last_message=None):
+    """Clear the terminal and optionally leave a `last_message`."""
     os.system('cls' if os.name == 'nt' else 'clear')
     if last_message:
         print(last_message)
 
 class InterfaceOption:
+    """Class used for `InterfaceMenu` options."""
     def __init__(self, display_text, callback, custom_display=None):
+        """
+        Params:
+            `display_text` - The text to display next to the option.
+            `callback` - The function to call when the option is selected.
+            `custom_display` - Text to display without an option in InterfaceMenu.
+        """
         self.display_text = display_text
         self.callback = callback
         self.custom_display = custom_display
 
     def call(self, *args, **kwargs):
+        """Calls the defined `callback` function; passes arguments through if they are passed."""
         if args or kwargs:
             self.callback(*args, **kwargs)
         else:
             self.callback()
 
 class InterfaceMenu:
+    """Base class for basic interface menus."""
     def __init__(self, title, options: dict[InterfaceOption]):
+        """
+        Params:
+            `title` - The title to display at the top of the console.
+            `options` - A list of `InterfaceOption` objects to automatically populate the menu in the `display` method.
+        """
         self.title = title
         self.options = options
         cls()
 
     def display(self):
-        """Show the menu"""
+        """Shows the menu, populating with the options and prompting user for input."""
         print(f"--- {self.title} ---")
         for option in self.options:
             if self.options[option].custom_display:
@@ -38,6 +53,7 @@ class InterfaceMenu:
         return self.display()
 
     def get_input(self, free_input=False) -> InterfaceOption:
+        """Prompts the user for input and returns the appropriate `InterfaceOption` if a valid one is selected."""
         if free_input:
             return input("").strip()
         
@@ -55,7 +71,12 @@ class InterfaceMenu:
         return option
 
 class UserMenu(InterfaceMenu):
+    """Once logged in, this menu is displayed. Due to advanced logic, `display` is overriden."""
     def __init__(self, username):
+        """
+        Params:
+            `username` - The logged in username.
+        """
         self.username = username
         self.title = f"Welcome {username}!"
         cls()
@@ -70,10 +91,16 @@ class UserMenu(InterfaceMenu):
         print("[6] Logout")
 
         command = input("Enter selection: ").strip()
+        
+        # View Own Profile
         if command == "1":
             UserInteractionMenu(self.username).display()
+        
+        # Edit Profile
         elif command == "2":
             user.edit_profile(self.username)
+
+        # Search Users
         elif command == "3":
             query = input("Enter the name of the user you are searching for: ")
             cls("--- User Search ---")
@@ -83,9 +110,26 @@ class UserMenu(InterfaceMenu):
                 UserInteractionMenu(self.username, result).display()
             else:
                 cls("User not found. Try searching again")
+        
+        # Friend Recommendations
         elif command == "4":
-            # TODO
-            pass
+            n = input("Enter number of friend recommendations to generate (leave blank for default 10): ")
+            try:
+                n = int(n)
+            except:
+                n = 10
+
+            if n <= 0:
+                n = 10
+
+            cls(f"--- {n} People You May Know ---")
+            result = user.friend_recommendations(self.username, n)
+            if result:
+                UserInteractionMenu(self.username, result).display()
+            else:
+                cls("Invalid user selection.")
+
+        # Popular Users
         elif command == "5":
             n = input("Enter number of users to search for (leave blank for default 10): ")
             try:
@@ -102,6 +146,8 @@ class UserMenu(InterfaceMenu):
                 UserInteractionMenu(self.username, result).display()
             else:
                 cls("Invalid user selection.")
+
+        # Log out
         elif command == "6":
             cls(f"Logged out of {self.username}")
             return
@@ -111,6 +157,7 @@ class UserMenu(InterfaceMenu):
         return self.display()
 
 class UserInteractionMenu(InterfaceMenu):
+    """User Interaction Menu"""
     def __init__(self, own_username, other_user=None):
         self.own_username = own_username
         self.other_user = other_user
@@ -137,7 +184,7 @@ class UserInteractionMenu(InterfaceMenu):
         self.options['3'] = InterfaceOption("View Following", self.view_following)
         
         if self.own_username != self.other_user.get('username'):
-            self.options['4'] = InterfaceOption("View Mutual Connections", self.view_mutuals)
+            self.options['4'] = InterfaceOption("View Mutual Following", self.view_mutuals)
         
         self.options['5'] = InterfaceOption("Exit Profile", self.exit)
 
@@ -167,21 +214,25 @@ class UserInteractionMenu(InterfaceMenu):
         command.call()
 
     def unfollow(self):
+        """Current (interacting) user unfollows the interacted user."""
         user.remove_follower(self.own_username, self.other_user.get('username'))
         self.options['1'] = InterfaceOption("Follow", self.follow)
         return self.display()
 
     def follow(self):
+        """Current (interacting) user follows the interacted user."""
         user.add_follower(self.own_username, self.other_user.get('username'))
         self.options['1'] = InterfaceOption("Unfollow", self.unfollow)
         return self.display()
 
     def remove_follower(self):
+        """Removes the interacted user from following the current (interacting) user."""
         user.remove_follower(self.other_user.get('username'), self.own_username)
         del self.options['0']
         return self.display()
 
     def view_followers(self):
+        """Generates a list of the interacted user's followers."""
         if not self.followers:
             cls("No users returned.")
             return self.display()
@@ -206,6 +257,7 @@ class UserInteractionMenu(InterfaceMenu):
         return self.display()
 
     def view_following(self):
+        """Generates a list of the users that the interacted user is following."""
         if not self.following:
             cls("No users returned.")
             return self.display()
@@ -230,6 +282,7 @@ class UserInteractionMenu(InterfaceMenu):
         return self.display()
 
     def view_mutuals(self):
+        """Generates a list of users followed by both the interacted and current (interacting) user."""
         cls(f"--- Users followed by {self.own_username} and {self.other_user.get('username')} ---")
         mutuals = user.get_mutuals(self.own_username, self.other_user.get('username'))
         
