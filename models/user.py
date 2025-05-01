@@ -153,7 +153,7 @@ def get_mutuals(user1, user2):
     mutuals = graph.run(query, user1=user1, user2=user2)
     return list(mutuals) if mutuals else []
 
-def get_also_followed_by(user1, user2):
+def get_also_followed_by(user1, user2): # Unused
     """Returns all people that `user1` follows that follow `user2` (implementation of Instagram's "Also followed by" feature)"""
     
     query = """
@@ -208,7 +208,7 @@ def friend_recommendations(username, n):
         WITH rec, count(*) AS score
         ORDER BY score DESC
         WITH score, collect(rec) AS recommendations
-        UNWIND recommendations AS recommended LIMIT 10
+        UNWIND recommendations AS recommended LIMIT {n}
         RETURN recommended, score
         """, username=username)
 
